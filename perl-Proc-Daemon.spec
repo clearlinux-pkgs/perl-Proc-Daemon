@@ -4,21 +4,30 @@
 #
 Name     : perl-Proc-Daemon
 Version  : 0.23
-Release  : 1
+Release  : 2
 URL      : https://cpan.metacpan.org/authors/id/A/AK/AKREAL/Proc-Daemon-0.23.tar.gz
 Source0  : https://cpan.metacpan.org/authors/id/A/AK/AKREAL/Proc-Daemon-0.23.tar.gz
 Source1  : http://http.debian.net/debian/pool/main/libp/libproc-daemon-perl/libproc-daemon-perl_0.23-1.debian.tar.xz
 Summary  : 'Run Perl program(s) as a daemon process'
 Group    : Development/Tools
 License  : Artistic-1.0 Artistic-1.0-Perl GPL-1.0
-Requires: perl-Proc-Daemon-license
-Requires: perl-Proc-Daemon-man
+Requires: perl-Proc-Daemon-license = %{version}-%{release}
+BuildRequires : buildreq-cpan
 BuildRequires : perl(Proc::ProcessTable)
 
 %description
 # Summary
 Proc::Daemon provides the capability for a Perl program to run
 as a Unix daemon process.
+
+%package dev
+Summary: dev components for the perl-Proc-Daemon package.
+Group: Development
+Provides: perl-Proc-Daemon-devel = %{version}-%{release}
+
+%description dev
+dev components for the perl-Proc-Daemon package.
+
 
 %package license
 Summary: license components for the perl-Proc-Daemon package.
@@ -28,19 +37,11 @@ Group: Default
 license components for the perl-Proc-Daemon package.
 
 
-%package man
-Summary: man components for the perl-Proc-Daemon package.
-Group: Default
-
-%description man
-man components for the perl-Proc-Daemon package.
-
-
 %prep
-tar -xf %{SOURCE1}
-cd ..
 %setup -q -n Proc-Daemon-0.23
-mkdir -p %{_topdir}/BUILD/Proc-Daemon-0.23/deblicense/
+cd ..
+%setup -q -T -D -n Proc-Daemon-0.23 -b 1
+mkdir -p deblicense/
 mv %{_topdir}/BUILD/debian/* %{_topdir}/BUILD/Proc-Daemon-0.23/deblicense/
 
 %build
@@ -65,12 +66,12 @@ make TEST_VERBOSE=1 test
 
 %install
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/usr/share/doc/perl-Proc-Daemon
-cp LICENSE %{buildroot}/usr/share/doc/perl-Proc-Daemon/LICENSE
+mkdir -p %{buildroot}/usr/share/package-licenses/perl-Proc-Daemon
+cp LICENSE %{buildroot}/usr/share/package-licenses/perl-Proc-Daemon/LICENSE
 if test -f Makefile.PL; then
-make pure_install PERL_INSTALL_ROOT=%{buildroot}
+make pure_install PERL_INSTALL_ROOT=%{buildroot} INSTALLDIRS=vendor
 else
-./Build install --installdirs=site --destdir=%{buildroot}
+./Build install --installdirs=vendor --destdir=%{buildroot}
 fi
 find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
 find %{buildroot} -depth -type d -exec rmdir {} 2>/dev/null ';'
@@ -79,13 +80,13 @@ find %{buildroot} -type f -name '*.bs' -empty -exec rm -f {} ';'
 
 %files
 %defattr(-,root,root,-)
-/usr/lib/perl5/site_perl/5.26.1/Proc/Daemon.pm
-/usr/lib/perl5/site_perl/5.26.1/Proc/Daemon.pod
+/usr/lib/perl5/vendor_perl/5.26.1/Proc/Daemon.pm
+/usr/lib/perl5/vendor_perl/5.26.1/Proc/Daemon.pod
 
-%files license
-%defattr(-,root,root,-)
-/usr/share/doc/perl-Proc-Daemon/LICENSE
-
-%files man
+%files dev
 %defattr(-,root,root,-)
 /usr/share/man/man3/Proc::Daemon.3
+
+%files license
+%defattr(0644,root,root,0755)
+/usr/share/package-licenses/perl-Proc-Daemon/LICENSE
